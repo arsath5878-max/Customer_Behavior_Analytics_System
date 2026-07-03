@@ -7,14 +7,34 @@ detect unusual transactions, and predict whether a customer is likely to stop pu
 
 The project is designed to help businesses make better decisions based on customer data.
 
-## Features
+Features
+1. Dataset
 
-* Data Preprocessing
-* Exploratory Data Analysis (EDA)
-* Customer Segmentation
-* Product Recommendation
-* Anomaly Detection
-* Customer Churn Prediction
+Loads and displays the customer purchase dataset used for analysis.
+
+2. Data Preprocessing
+
+Cleans the dataset by handling missing values, removing duplicates, and preparing the data for machine learning models.
+
+3. Exploratory Data Analysis (EDA)
+
+Analyzes the dataset using statistics and visualizations to understand customer purchasing patterns and trends.
+
+4. Product Recommendation
+
+Recommends products to customers based on their purchase history and similarities with other customers.
+
+5. Customer Segmentation
+
+Groups customers with similar purchasing behavior using clustering techniques. These groups help businesses create targeted marketing strategies.
+
+6. Anomaly Detection
+
+Identifies unusual customer transactions or purchasing behavior that may indicate fraud or abnormal activity.
+
+7. Churn Prediction
+
+Predicts customers who are likely to stop purchasing, helping businesses improve customer retention.
 
 ## Tech Stack
 
