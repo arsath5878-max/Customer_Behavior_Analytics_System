@@ -1,4 +1,4 @@
-Customer Behavior Analytics System
+## Customer Behavior Analytics System
 
  About the Project:
 Customer Behavior Analytics System is a machine learning project that helps analyze customer purchase data. 
@@ -7,7 +7,7 @@ detect unusual transactions, and predict whether a customer is likely to stop pu
 
 The project is designed to help businesses make better decisions based on customer data.
 
-Features
+## Features
 1. Dataset
 
 Loads and displays the customer purchase dataset used for analysis.
