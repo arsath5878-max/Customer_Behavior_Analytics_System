@@ -1,58 +1,34 @@
 import pandas as pd
 import matplotlib.pyplot as plt
-
-from sklearn.preprocessing import LabelEncoder
 from sklearn.ensemble import IsolationForest
 
-# Load Dataset
+DATA_FILE = "customer_behavior_dataset_updated.xlsx"
 
+data = pd.read_excel(DATA_FILE)
 
-data = pd.read_excel("customer_purchase_dataset.xlsx")
+activity_map = {"Low": 0, "Medium": 1, "High": 2}
+data["Customer_Activity"] = data["Customer_Activity"].map(activity_map)
 
-
-# Encode Categorical Columns
-
-
-encoder = LabelEncoder()
-
-columns = [
-    "Gender",
-    "Occupation",
-    "City",
-    "Product_Category",
-    "Purchase"
+# Behavioral features; no income information is required.
+feature_columns = [
+    "Previous_Purchases",
+    "Website_Visits",
+    "Time_Spent_Minutes",
+    "Last_Purchase_Days",
+    "Customer_Activity",
+    "Pages_Viewed",
+    "Cart_Interactions",
+    "Login_Frequency"
 ]
 
-for col in columns:
-    data[col] = encoder.fit_transform(data[col])
-
-
-
-X = data[
-    [
-        "Annual_Income",
-        "Previous_Purchases",
-        "Website_Visits",
-        "Time_Spent_Minutes"
-    ]
-]
-
-
-# Isolation Forest Model
-
+X = data[feature_columns]
 
 model = IsolationForest(
-    
     contamination=0.02,
     random_state=42
-    
 )
 
 data["Anomaly"] = model.fit_predict(X)
-
-
-# Count Normal and Anomaly
-
 
 normal = (data["Anomaly"] == 1).sum()
 anomaly = (data["Anomaly"] == -1).sum()
@@ -60,52 +36,47 @@ anomaly = (data["Anomaly"] == -1).sum()
 print("=" * 50)
 print("ANOMALY DETECTION")
 print("=" * 50)
-
 print("Total Customers :", len(data))
 print("Normal Customers :", normal)
 print("Anomalies Found :", anomaly)
 
-# Display First 10 Anomalies
 print("\nSample Anomalies")
-
 print(data[data["Anomaly"] == -1].head(10))
 
-
-# Scatter Plot
-
-
-colors = data["Anomaly"].map({1: "blue", -1: "red"})
-
-plt.figure(figsize=(8,6))
-
+plt.figure(figsize=(8, 6))
 plt.scatter(
-    data["Annual_Income"],
-    data["Previous_Purchases"],
-    c=colors
+    data["Website_Visits"],
+    data["Time_Spent_Minutes"],
+    c=data["Anomaly"].map({1: "blue", -1: "red"})
 )
-
-plt.title("Isolation Forest Anomaly Detection")
-
-plt.xlabel("Annual Income")
-
-plt.ylabel("Previous Purchases")
-
+plt.title("Isolation Forest - Customer Behavior Anomalies")
+plt.xlabel("Website Visits")
+plt.ylabel("Time Spent (Minutes)")
 plt.show()
-print("\n")
-print("=" * 50)
+
+print("\n" + "=" * 50)
 print("CHECK NEW CUSTOMER")
 print("=" * 50)
 
-income = float(input("Enter Annual Income : "))
-purchases = int(input("Enter Previous Purchases : "))
-visits = int(input("Enter Website Visits : "))
-time_spent = int(input("Enter Time Spent (Minutes) : "))
+purchases = int(input("Previous Purchases : "))
+visits = int(input("Website Visits : "))
+time_spent = int(input("Time Spent (Minutes) : "))
+last_purchase = int(input("Last Purchase Days : "))
+activity_input = input("Customer Activity (Low/Medium/High) : ").strip().capitalize()
+pages = int(input("Pages Viewed : "))
+cart = int(input("Cart Interactions : "))
+logins = int(input("Login Frequency : "))
 
-new_customer = [[income, purchases, visits, time_spent]]
+if activity_input not in activity_map:
+    print("Invalid Customer Activity.")
+    raise SystemExit
+
+new_customer = [[
+    purchases, visits, time_spent, last_purchase,
+    activity_map[activity_input], pages, cart, logins
+]]
 
 prediction = model.predict(new_customer)
-
-print("\n")
 
 if prediction[0] == 1:
     print("Status : Normal Customer")
