@@ -5,23 +5,16 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 from xgboost import XGBClassifier
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
 
-DATA_FILE = "customer_behavior_dataset_updated.xlsx"
+data = pd.read_excel("customer_behavior_dataset_updated.xlsx")
 
-data = pd.read_excel(DATA_FILE)
-
-# Encode categorical input columns.
 encoder = LabelEncoder()
 for col in ["Gender", "Occupation", "City", "Product_Category"]:
     data[col] = encoder.fit_transform(data[col])
 
-# Purchase is the target.
-purchase_map = {"No": 0, "Yes": 1}
-data["Purchase"] = data["Purchase"].map(purchase_map)
+data["Purchase"] = data["Purchase"].map({"No": 0, "Yes": 1})
 
-# Remove Customer_ID and target from the input features.
-# Annual_Income is no longer present or used.
 X = data.drop(["Customer_ID", "Purchase"], axis=1)
 y = data["Purchase"]
 
@@ -29,26 +22,42 @@ X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.20, random_state=42, stratify=y
 )
 
-lr = LogisticRegression(max_iter=2000)
-lr.fit(X_train, y_train)
-lr_acc = accuracy_score(y_test, lr.predict(X_test))
+models = {
+    "Logistic Regression": LogisticRegression(max_iter=2000),
+    "Decision Tree": DecisionTreeClassifier(random_state=42),
+    "Random Forest": RandomForestClassifier(random_state=42),
+    "XGBoost": XGBClassifier(eval_metric="logloss", random_state=42)
+}
 
-dt = DecisionTreeClassifier(random_state=42)
-dt.fit(X_train, y_train)
-dt_acc = accuracy_score(y_test, dt.predict(X_test))
+results = []
 
-rf = RandomForestClassifier(random_state=42)
-rf.fit(X_train, y_train)
-rf_acc = accuracy_score(y_test, rf.predict(X_test))
+for name, model in models.items():
+    model.fit(X_train, y_train)
+    pred = model.predict(X_test)
 
-xgb = XGBClassifier(eval_metric="logloss", random_state=42)
-xgb.fit(X_train, y_train)
-xgb_acc = accuracy_score(y_test, xgb.predict(X_test))
+    accuracy = accuracy_score(y_test, pred)
+    precision = precision_score(y_test, pred, zero_division=0)
+    recall = recall_score(y_test, pred, zero_division=0)
+    f1 = f1_score(y_test, pred, zero_division=0)
 
-print("=" * 50)
-print("PURCHASE PREDICTION - MODEL ACCURACY")
-print("=" * 50)
-print(f"Logistic Regression : {lr_acc * 100:.2f}%")
-print(f"Decision Tree       : {dt_acc * 100:.2f}%")
-print(f"Random Forest       : {rf_acc * 100:.2f}%")
-print(f"XGBoost             : {xgb_acc * 100:.2f}%")
+    results.append([name, accuracy, precision, recall, f1])
+
+    print("\n", name)
+    print("Accuracy :", f"{accuracy * 100:.2f}%")
+    print("Precision:", f"{precision * 100:.2f}%")
+    print("Recall   :", f"{recall * 100:.2f}%")
+    print("F1 Score :", f"{f1 * 100:.2f}%")
+    print("Confusion Matrix:")
+    print(confusion_matrix(y_test, pred))
+
+print("\nMODEL COMPARISON")
+print("-" * 70)
+print("Model\t\t\tAccuracy\tPrecision\tRecall\tF1 Score")
+
+for result in results:
+    print(f"{result[0]:20} {result[1]:.2%}\t\t{result[2]:.2%}\t\t{result[3]:.2%}\t{result[4]:.2%}")
+
+best = max(results, key=lambda x: x[4])
+
+print("\nBEST MODEL:", best[0])
+print("F1 Score:", f"{best[4] * 100:.2f}%")
